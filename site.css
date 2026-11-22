@@ -1,0 +1,98 @@
+:root {
+  color-scheme: dark;
+  --bg: #141729;
+  --paper: #fbf1de;
+  --muted: #c9c9d9;
+  --edge: #d3cedb36;
+  --gold: #f4bc78;
+  --header: "Yu Mincho", YuMincho, "Hiragino Mincho ProN", serif;
+  font-family: "Yu Gothic UI", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  color: var(--paper);
+  background: var(--bg);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; line-height: 1.65; }
+h1, h2, h3, p { margin: 0; }
+img { display: block; max-width: 100%; }
+a { color: inherit; }
+a:focus-visible { outline: 2px solid #ffdaac; outline-offset: 4px; }
+.shell { width: min(calc(100% - 68px), 1190px); margin-inline: auto; }
+.skip-link { position: fixed; top: 10px; left: 10px; z-index: 8; padding: 8px 14px; transform: translateY(-150%); background: var(--gold); color: #28190d; }
+.skip-link:focus { transform: none; }
+.header { background: #111425; border-bottom: 1px solid #d4a7773e; }
+.header__content { min-height: 72px; display: flex; align-items: center; gap: clamp(20px, 4vw, 52px); }
+.brand { margin-right: auto; display: inline-flex; align-items: center; gap: 12px; white-space: nowrap; text-decoration: none; font-size: .83rem; font-weight: 760; letter-spacing: .16em; }
+.brand__mark { padding: 5px 7px 7px; color: var(--gold); border: 1px solid #bf9a71; font: 760 1.25rem/1 var(--header); }
+.header nav { display: flex; gap: 28px; }
+.header nav a { color: var(--muted); font-size: .9375rem; text-decoration: none; white-space: nowrap; }
+.header nav a:hover { color: var(--gold); }
+.button { min-height: 50px; padding: 10px 21px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 4px; font-weight: 720; text-decoration: none; white-space: nowrap; }
+.button--outline { min-height: 40px; padding: 7px 14px; border-color: #c49d70; color: #f8cea1; font-size: .9375rem; }
+.button--outline:hover { background: #d3a16d20; }
+.button--gold { background: #f3bd7d; color: #27180f; }
+.button--gold:hover { background: #ffd59d; }
+.button--glass { background: #111829c9; border-color: #e1c6a67a; }
+.button--glass:hover { background: #282c43; }
+
+.frontier { position: relative; isolation: isolate; min-height: clamp(500px, 46vw, 692px); display: grid; align-items: center; overflow: hidden; background: #161a31; border-bottom: 1px solid #e3b47869; }
+.frontier__art { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; object-fit: cover; object-position: 68% 53%; }
+.frontier::after { position: absolute; inset: 0; z-index: -1; content: ""; background: linear-gradient(90deg, #101425e6 2%, #101425a3 28%, #17192d43 45%, transparent 68%), linear-gradient(0deg, #141729c7, transparent 36%); }
+.frontier__content { padding-block: 58px 66px; }
+.frontier__copy { max-width: 430px; }
+.frontier__genre { color: #ffd6a9; font-size: .9375rem; font-weight: 750; letter-spacing: .09em; }
+.frontier h1 { margin-block: 12px 14px; font: 820 clamp(3.3rem, 7.15vw, 6.6rem)/1.08 var(--header); letter-spacing: .05em; text-shadow: 0 3px 28px #100a10; }
+.frontier__description { max-width: 395px; color: #f0edf2; font-size: clamp(1rem, 1.65vw, 1.17rem); line-height: 1.8; text-shadow: 0 1px 6px #121426; }
+.frontier__actions { margin-top: 25px; display: flex; flex-wrap: wrap; gap: 10px; }
+.frontier__note { margin-top: 15px; color: #e4ddec; font-size: .9rem; }
+
+.section { padding-block: clamp(41px, 6vw, 80px); }
+.section__header { margin-bottom: 25px; }
+.section__header h2 { font: 760 clamp(1.75rem, 3.7vw, 2.7rem)/1.3 var(--header); letter-spacing: .045em; }
+.section__header p { margin-top: 9px; max-width: 40rem; color: var(--muted); }
+.modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.mode { --accent: #edbe8a; display: flex; flex-direction: column; align-items: start; border: 1px solid var(--edge); border-top: 2px solid var(--accent); border-radius: 4px; background: #1b2035; padding: clamp(16px, 2.5vw, 28px); }
+.mode--random { --accent: #afc9f4; }
+.mode--cpu { --accent: #e9acc8; }
+.mode h3 { color: var(--accent); font-size: 1.15rem; }
+.mode p { color: var(--muted); margin-block: 8px 16px; }
+.mode a { margin-top: auto; color: var(--paper); text-underline-offset: .25em; }
+.mode a:hover { color: var(--accent); }
+
+.territories { background: #181c30; border-block: 1px solid var(--edge); }
+.factions { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.faction { --accent: #f1bf89; display: grid; grid-template-columns: 122px 1fr; gap: 17px; min-width: 0; min-height: 122px; align-items: center; overflow: hidden; border: 1px solid var(--edge); border-inline-end: 2px solid var(--accent); background: #101629; border-radius: 4px; }
+.faction--orbit { --accent: #83d1ec; }
+.faction--occult { --accent: #c7adf3; }
+.faction--stage { --accent: #f2a1ad; }
+.faction img { width: 100%; height: 100%; aspect-ratio: 1; object-fit: cover; image-rendering: pixelated; }
+.faction__copy { padding: 13px 16px 13px 0; }
+.faction h3 { font-size: 1.16rem; line-height: 1.35; color: var(--accent); }
+.faction p { margin-top: 5px; color: var(--muted); }
+.footer__content { min-height: 74px; display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: .9rem; }
+.footer__engine { margin-left: 10px; }
+.footer a { text-underline-offset: .3em; }
+.footer a:hover { color: var(--gold); }
+
+@media (max-width: 820px) {
+  .shell { width: min(calc(100% - 40px), 1190px); }
+  .modes { gap: 10px; }
+  .factions { gap: 10px; }
+  .faction { grid-template-columns: 99px 1fr; gap: 12px; }
+}
+@media (max-width: 640px) {
+  .header__content { min-height: 59px; gap: 12px; }
+  .header nav { display: none; }
+  .brand { gap: 8px; font-size: .75rem; letter-spacing: .08em; }
+  .frontier { min-height: auto; }
+  .frontier__art { height: auto; aspect-ratio: 1.55; object-position: 80% 46%; }
+  .frontier::after { background: linear-gradient(180deg, transparent 32vw, #141729 65vw); }
+  .frontier__content { padding-block: 53vw 29px; }
+  .frontier h1 { margin-block: 8px 12px; }
+  .frontier__actions { margin-top: 20px; }
+  .button { padding-inline: 15px; }
+  .header__play { padding-inline: 11px; }
+  .modes, .factions { grid-template-columns: 1fr; gap: 12px; }
+  .mode { padding: 15px 18px 17px; }
+  .mode p { margin-bottom: 9px; }
+}
+

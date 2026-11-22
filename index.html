@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101327">
+  <meta name="description" content="境界戦線は四つの陣営が交わる1対1のリアルタイムカードゲーム。ブラウザで友だちとの対戦、ランダムマッチ、CPU戦を遊べます。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="境界戦線 | BOUNDARY FRONT">
+  <meta property="og:description" content="四つの陣営から選ぶリアルタイムカードバトル。ブラウザで対戦。">
+  <meta property="og:url" content="https://co1414.github.io/">
+  <meta property="og:image" content="https://co1414.github.io/frontier.webp">
+  <link rel="canonical" href="https://co1414.github.io/">
+  <title>境界戦線 | ブラウザ対戦カードゲーム</title>
+  <link rel="stylesheet" href="./site.css">
+  <script>
+    const query = new URLSearchParams(location.search);
+    const mode = query.get('mode');
+    if (query.has('room') || mode === 'online' || mode === 'cpu') {
+      const target = new URL('https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/');
+      if (query.has('room')) {
+        const code = (query.get('room') ?? '').toUpperCase().replace(/[^A-F0-9]/g, '').slice(0, 8);
+        target.searchParams.set('mode', 'online');
+        if (code) target.searchParams.set('room', code);
+      } else {
+        target.searchParams.set('mode', mode);
+      }
+      location.replace(target);
+    }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">本文へ</a>
+  <header class="header">
+    <div class="shell header__content">
+      <a class="brand" href="./" aria-label="境界戦線 ホーム">
+        <span class="brand__mark" aria-hidden="true">境</span>
+        <span lang="en">BOUNDARY FRONT</span>
+      </a>
+      <nav aria-label="サイト内メニュー">
+        <a href="#modes">対戦モード</a>
+        <a href="#factions">四つの陣営</a>
+      </nav>
+      <a class="button button--outline header__play" href="https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/">ゲームを開く</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="frontier" aria-labelledby="title">
+      <img class="frontier__art" src="./frontier.webp" width="1860" height="845" alt="" fetchpriority="high">
+      <div class="shell frontier__content">
+        <div class="frontier__copy">
+          <p class="frontier__genre">1対1のリアルタイムカードゲーム</p>
+          <h1 id="title">境界戦線</h1>
+          <p class="frontier__description">四つの世界が重なる戦場へ。陣営を選んで30枚のデッキを組み、上下二つのラインから相手のリーダーを攻めよう。</p>
+          <div class="frontier__actions">
+            <a class="button button--gold" href="https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/?mode=online">オンライン対戦</a>
+            <a class="button button--glass" href="https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/?mode=cpu">CPUと遊ぶ</a>
+          </div>
+          <p class="frontier__note">ゲームは境界戦線の対戦サイトで開きます。登録・インストール不要です。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section shell" id="modes" aria-labelledby="modes-title">
+      <header class="section__header">
+        <h2 id="modes-title">対戦モード</h2>
+      </header>
+      <div class="modes">
+        <article class="mode mode--room">
+          <h3>友だちと遊ぶ</h3>
+          <p>ルームを作って招待リンクを共有。友だちが自分のデッキを選んで参加すると、試合が始まります。</p>
+          <a href="https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/?mode=online">ルーム対戦を開く</a>
+        </article>
+        <article class="mode mode--random">
+          <h3>相手を探す</h3>
+          <p>ランダムマッチで同じ時間に検索しているプレイヤーと対戦。待っている間は検索を取り消せます。</p>
+          <a href="https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/?mode=online">マッチング画面を開く</a>
+        </article>
+        <article class="mode mode--cpu">
+          <h3>ひとりで遊ぶ</h3>
+          <p>CPU戦で対戦相手と難易度を選べます。ゲームメニューには基本操作と各陣営のチュートリアルもあります。</p>
+          <a href="https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/?mode=cpu">CPU戦を開く</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="territories" id="factions" aria-labelledby="factions-title">
+      <div class="section shell">
+        <header class="section__header">
+          <h2 id="factions-title">四つの陣営</h2>
+          <p>初期デッキから選べます。陣営のカードと汎用カードを合わせて、自分の編成に育てましょう。</p>
+        </header>
+        <div class="factions">
+          <article class="faction faction--lantern">
+            <img src="./LF1.png" width="128" height="128" alt="灯守リゼ" loading="lazy" decoding="async">
+            <div class="faction__copy"><h3>灯路冒険団</h3><p>冒険者と魔物を並べて財宝を集め、味方の展開を支える。</p></div>
+          </article>
+          <article class="faction faction--orbit">
+            <img src="./LS1.png" width="128" height="128" alt="機関長イオ" loading="lazy" decoding="async">
+            <div class="faction__copy"><h3>オービット</h3><p>ロボット・ビークル・兵器で蓄電し、大型機の攻勢につなげる。</p></div>
+          </article>
+          <article class="faction faction--occult">
+            <img src="./LO1.png" width="128" height="128" alt="記録官トオリ" loading="lazy" decoding="async">
+            <div class="faction__copy"><h3>零時観測局</h3><p>怪異の証拠を集め、墓地からユニットを蘇生して前線を立て直す。</p></div>
+          </article>
+          <article class="faction faction--stage">
+            <img src="./LT1.png" width="128" height="128" alt="灯装隊長エンジ" loading="lazy" decoding="async">
+            <div class="faction__copy"><h3>星幕劇団</h3><p>味方の配置を変えて喝采を集め、ヒーローとヴィランの力を引き出す。</p></div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="shell footer__content">
+      <span>境界戦線 <span class="footer__engine" lang="en">Kotonoha Engine</span></span>
+      <a href="https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/">ゲームメニュー</a>
+    </div>
+  </footer>
+</body>
+</html>
+
