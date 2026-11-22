@@ -41,6 +41,7 @@ a:focus-visible { outline: 2px solid #ffdaac; outline-offset: 4px; }
 .frontier__copy { max-width: 430px; }
 .frontier__genre { color: #ffd6a9; font-size: .9375rem; font-weight: 750; letter-spacing: .09em; }
 .frontier h1 { margin-block: 12px 14px; font: 820 clamp(3.3rem, 7.15vw, 6.6rem)/1.08 var(--header); letter-spacing: .05em; text-shadow: 0 3px 28px #100a10; }
+.frontier__entry { min-width: 210px; min-height: 55px; margin-block: 0 14px; font-size: 1.08rem; box-shadow: 0 6px 20px #0d0d1e80; }
 .frontier__description { max-width: 395px; color: #f0edf2; font-size: clamp(1rem, 1.65vw, 1.17rem); line-height: 1.8; text-shadow: 0 1px 6px #121426; }
 .frontier__actions { margin-top: 25px; display: flex; flex-wrap: wrap; gap: 10px; }
 .frontier__note { margin-top: 15px; color: #e4ddec; font-size: .9rem; }
@@ -88,6 +89,7 @@ a:focus-visible { outline: 2px solid #ffdaac; outline-offset: 4px; }
   .frontier::after { background: linear-gradient(180deg, transparent 32vw, #141729 65vw); }
   .frontier__content { padding-block: 53vw 29px; }
   .frontier h1 { margin-block: 8px 12px; }
+  .frontier__entry { width: 100%; min-width: 0; }
   .frontier__actions { margin-top: 20px; }
   .button { padding-inline: 15px; }
   .header__play { padding-inline: 11px; }

@@ -9,14 +9,14 @@
   <meta property="og:title" content="境界戦線 | BOUNDARY FRONT">
   <meta property="og:description" content="四つの陣営から選ぶリアルタイムカードバトル。ブラウザで対戦。">
   <meta property="og:url" content="https://co1414.github.io/">
-  <meta property="og:image" content="https://co1414.github.io/frontier.webp">
   <link rel="canonical" href="https://co1414.github.io/">
+  <meta property="og:image" content="https://co1414.github.io/frontier.webp">
   <title>境界戦線 | ブラウザ対戦カードゲーム</title>
   <link rel="stylesheet" href="./site.css">
   <script>
     const query = new URLSearchParams(location.search);
     const mode = query.get('mode');
-    if (query.has('room') || mode === 'online' || mode === 'cpu') {
+    if (query.has('room') || ['menu', 'online', 'cpu'].includes(mode)) {
       const target = new URL('https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/');
       if (query.has('room')) {
         const code = (query.get('room') ?? '').toUpperCase().replace(/[^A-F0-9]/g, '').slice(0, 8);
@@ -41,7 +41,7 @@
         <a href="#modes">対戦モード</a>
         <a href="#factions">四つの陣営</a>
       </nav>
-      <a class="button button--outline header__play" href="https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/">ゲームを開く</a>
+      <a class="button button--outline header__play" href="https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/?mode=menu" aria-label="ゲームメニューへ">ゲームへ</a>
     </div>
   </header>
 
@@ -52,9 +52,10 @@
         <div class="frontier__copy">
           <p class="frontier__genre">1対1のリアルタイムカードゲーム</p>
           <h1 id="title">境界戦線</h1>
+          <a class="button button--gold frontier__entry" href="https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/?mode=menu">ゲームメニューへ</a>
           <p class="frontier__description">四つの世界が重なる戦場へ。陣営を選んで30枚のデッキを組み、上下二つのラインから相手のリーダーを攻めよう。</p>
           <div class="frontier__actions">
-            <a class="button button--gold" href="https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/?mode=online">オンライン対戦</a>
+            <a class="button button--glass" href="https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/?mode=online">オンライン対戦</a>
             <a class="button button--glass" href="https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/?mode=cpu">CPUと遊ぶ</a>
           </div>
           <p class="frontier__note">ゲームは境界戦線の対戦サイトで開きます。登録・インストール不要です。</p>
@@ -116,7 +117,7 @@
   <footer class="footer">
     <div class="shell footer__content">
       <span>境界戦線 <span class="footer__engine" lang="en">Kotonoha Engine</span></span>
-      <a href="https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/">ゲームメニュー</a>
+      <a href="https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/?mode=menu">ゲームメニュー</a>
     </div>
   </footer>
 </body>
