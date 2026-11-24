@@ -8576,7 +8576,7 @@ SOFTWARE.
         main.append(el('p','オンライン対戦には対戦サーバーを使用します。サーバーのURLからゲームを開いてください。'));
         const shared=p.id==='boundary-front';
         const link=el('a',shared?'共通の対戦サーバーを開く':'このPCの対戦サーバーを開く');
-        link.href=shared?'https://boundary-front-online-kotonoha.kota-newlight.chatgpt.site/play/?mode=online':'http://127.0.0.1:4180/';main.append(link);
+        link.href=shared?'https://co1414.github.io/play/?mode=online':'http://127.0.0.1:4180/';main.append(link);
         return;
       }
       const ready=B.validDeck(p,faction,profile().decks[faction],profile().owned);
