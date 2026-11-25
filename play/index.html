@@ -5975,6 +5975,15 @@ SOFTWARE.
   ];
   const deckSlotLimit=20, deckNameLimit=40;
   const deckShelf=(x,f)=>x.deckLibrary?.[f]??{active:0,slots:[{name:'デッキ1'}]};
+  const matchDeckFields={battle:'lastBattleDeck',online:'lastOnlineDeck'};
+  function validMatchDeck(x,selection){
+    return factions.includes(selection?.faction)&&Number.isInteger(selection.index)&&selection.index>=0&&
+      selection.index<deckShelf(x,selection.faction).slots.length;
+  }
+  function matchDeckPreference(x,mode){
+    if(!Object.hasOwn(matchDeckFields,mode))return;
+    return x[matchDeckFields[mode]]??(mode==='battle'?x.lastOnlineDeck:x.lastBattleDeck);
+  }
   const validDeckName=name=>typeof name==='string'&&name.length>0&&name.length<=deckNameLimit&&name===name.trim()&&!/[\r\n]/.test(name);
   function deckShortages(p,ids,owned){
     const required={};
@@ -6041,9 +6050,11 @@ SOFTWARE.
         const target=slots[active];
         if(!validDeck(p,f,target.ids,target.draft?undefined:x.owned,false))return false;
         slots[active]={name:target.name,...(target.draft?{draft:true}:{})};
-        if(x.lastBattleDeck?.faction===f){
-          if(x.lastBattleDeck.index===removed)delete x.lastBattleDeck;
-          else if(x.lastBattleDeck.index>removed)x.lastBattleDeck={faction:f,index:x.lastBattleDeck.index-1};
+        for(const field of Object.values(matchDeckFields)){
+          const preference=x[field];
+          if(preference?.faction!==f)continue;
+          if(preference.index===removed)delete x[field];
+          else if(preference.index>removed)x[field]={faction:f,index:preference.index-1};
         }
         deck=target.ids.slice();
         break;
@@ -6126,8 +6137,7 @@ SOFTWARE.
       Object.keys(p.cards).every(id=>(expansionId(id)&&!Object.hasOwn(x.owned,id))||(nat(x.owned[id])&&x.owned[id]<=3))&&
       factions.every(f=>validDeck(p,f,x.decks[f],deckShelf(x,f).slots?.[deckShelf(x,f).active]?.draft?undefined:x.owned,false)&&p.factions[f].skins.some(s=>s.id===x.skins[f]))&&
       validDeckLibrary(p,x)&&
-      (x.lastBattleDeck===undefined||factions.includes(x.lastBattleDeck?.faction)&&nat(x.lastBattleDeck.index)&&
-        x.lastBattleDeck.index<deckShelf(x,x.lastBattleDeck.faction).slots.length)&&
+      Object.values(matchDeckFields).every(field=>x[field]===undefined||validMatchDeck(x,x[field]))&&
       subset(x.cleared,p.story.map((s,i)=>i))&&subset(x.won,factions)&&validMissions()&&
       (x.storyCleared===undefined||subset(x.storyCleared,(p.storyRoutes??[]).flatMap((row,i)=>row.map((_,j)=>storyId(i,j)))))&&
       (x.tutorialCleared===undefined||subset(x.tutorialCleared,factions))&&
@@ -6501,6 +6511,13 @@ SOFTWARE.
       validDeck(p,c.faction,c.ids,undefined,false)){x.decks[c.faction]=c.ids.slice();return true;}
     if(c.type==='deck-sample')return claimSampleDeck(p,x,c.faction);
     if(deckLibraryCommands.has(c.type))return editDeckLibrary(p,x,c);
+    if(c.type==='match-deck'){
+      if(!Object.hasOwn(matchDeckFields,c.mode)||!validMatchDeck(x,c))return false;
+      const {faction,index}=c;
+      if(deckShelf(x,faction).active!==index&&!editDeckLibrary(p,x,{type:'deck-select',faction,index}))return false;
+      x[matchDeckFields[c.mode]]={faction,index};
+      return true;
+    }
     if(c.type==='skin'&&p.factions[c.faction]?.skins.some(s=>s.id===c.id)){x.skins[c.faction]=c.id;return true;}
     if(c.type==='craft'&&Object.hasOwn(p.cards,c.id)){
       const n=prices[p.cards[c.id].rarity];if(x.owned[c.id]>=3||x.material<n)return false;
@@ -6749,7 +6766,7 @@ SOFTWARE.
     mergeCommands(a,c){if(a?.type==='advance'&&c.type==='advance'&&a.ticks+c.ticks<=72000){a.ticks+=c.ticks;return true;}return false;}});
   Object.assign(B,{getDeck,deckName,deckConfig,deckVariants,setForVariant,hasExpansion,expansionId,validDeck,profileOK,battleProject,missionStatus,matchFingerprint,cpuProfile,rewardRates,
     battleRewardSize,guaranteedRewardInterval,weeklyRules,weeklyRule,deckShortages,deckCode,readDeckCode,
-    deckShelf,deckSlotLimit,deckNameLimit,sampleDecks,sampleDeckIndex,storyId,storyEncounter,storyAvailable,redrawHand,choose,cpuAction,stepBattle,prices,factions});
+    deckShelf,matchDeckPreference,deckSlotLimit,deckNameLimit,sampleDecks,sampleDeckIndex,storyId,storyEncounter,storyAvailable,redrawHand,choose,cpuAction,stepBattle,prices,factions});
 })(globalThis.Kotonoha);
 
 (function (K) {
@@ -8595,21 +8612,25 @@ SOFTWARE.
     };
     const row=(...nodes)=>{const r=el('div',undefined,'bf-row');r.append(...nodes);return r;};
     const h=(title)=>el('h2',title);
-    function restoreBattleDeck(){
-      const latest=profile().lastBattleDeck;
-      if(!latest)return;
+    const isMatchSetup=mode=>mode==='battle'||mode==='online';
+    function restoreMatchDeck(mode){
+      const latest=B.matchDeckPreference(profile(),mode);
+      if(!latest)return rememberMatchDeck(mode);
       faction=latest.faction;
-      if(B.deckShelf(profile(),faction).active!==latest.index)engine.dispatch({type:'deck-select',faction,index:latest.index});
+      return B.deckShelf(profile(),faction).active!==latest.index&&engine.dispatch({type:'deck-select',faction,index:latest.index});
+    }
+    function rememberMatchDeck(mode,index=B.deckShelf(profile(),faction).active){
+      return engine.dispatch({type:'match-deck',mode,faction,index});
     }
     function go(to,restore=true){
       if(to==='tutorial')dismissTutorialIntro();
-      if(to==='deck'&&page!=='deck')deckReturn=['story','battle','online'].includes(page)?page:'home';
-      const resumeDeck=to==='battle'&&page!=='deck'&&restore;
-      if(page==='deck'&&to!=='deck')deckEditor=null;
+      const fromDeck=page==='deck';
+      if(to==='deck'&&!fromDeck)deckReturn=['story','battle','online'].includes(page)?page:'home';
+      if(fromDeck&&to!=='deck')deckEditor=null;
       page=to;detail=null;notice='';stamp='';
-      if(resumeDeck)restoreBattleDeck();
+      const deckUpdated=isMatchSetup(to)&&(fromDeck?rememberMatchDeck(to):restore&&restoreMatchDeck(to));
       if(!online.state.session&&engine.state.screen==='result')engine.dispatch({type:'home'});
-      else render();
+      else if(!deckUpdated)render();
       if(to==='home'||to==='title')root.querySelector('.bf-menu-heading,.bf-title-start')?.focus();
       if(to==='tutorial'){
         const heading=root.querySelector('.bf-heading h2');
@@ -8622,8 +8643,17 @@ SOFTWARE.
       select.value=String(value);select.onchange=()=>{audio.effect('select');change(select.value);};return wrap;
     }
     const factionItems=()=>B.factions.map(f=>[f,p.factions[f].name]);
-    const matchDeckPicker=()=>dropdown('使用するデッキ',B.savedDeckOptions(profile(),faction),B.deckShelf(profile(),faction).active,
-      index=>dispatch({type:'deck-select',faction,index:+index}));
+    function matchDeckControls(mode){
+      const factions=dropdown('自分の陣営',factionItems(),faction,value=>{
+        faction=value;
+        if(!isMatchSetup(mode)||!rememberMatchDeck(mode))render();
+      });
+      const decks=dropdown('使用するデッキ',B.savedDeckOptions(profile(),faction),B.deckShelf(profile(),faction).active,index=>{
+        if(isMatchSetup(mode))rememberMatchDeck(mode,+index);
+        else dispatch({type:'deck-select',faction,index:+index});
+      });
+      return row(factions,decks);
+    }
     function publishedPageLink(){
       const link=el('a','公開ページへ','bf-online-back');
       link.href='/';return link;
@@ -8821,7 +8851,7 @@ SOFTWARE.
     function goalLabel(s){return s.goal?.kind==='survive'?`${s.goal.ticks/20}秒間リーダーを守る`:s.goal?`${s.goal.ticks/20}秒以内に勝利`:'通常の勝利条件';}
     function setup(main,story){
       header(main,story?'ストーリー':'バトル');
-      const f=p.factions[faction], controls=row(dropdown('自分の陣営',factionItems(),faction,v=>{faction=v;render();}),matchDeckPicker());
+      const f=p.factions[faction], controls=matchDeckControls(story?'story':'battle');
       const info=el('div',undefined,'bf-brief');
       if(story){
         const chapters=el('div',undefined,'bf-chapters');
@@ -9014,11 +9044,13 @@ SOFTWARE.
       identity.append(nameForm,record,row(btn('戦績を更新',()=>refreshRecord()),btn('対人戦の集計',()=>showAnalytics())));
       main.append(identity);
       if(onlineRecord===undefined)refreshRecord();
-      const selectedFaction=dropdown('自分の陣営',factionItems(),faction,value=>{faction=value;render();});
-      const roster=()=>({faction,deck:profile().decks[faction],skin:profile().skins[faction]});
+      const roster=()=>{
+        rememberMatchDeck('online');
+        return {faction,deck:profile().decks[faction],skin:profile().skins[faction]};
+      };
       const create=code=>online.enter(code,roster());
       const config=onlinePanel('対戦に使うデッキ');
-      config.append(row(selectedFaction,matchDeckPicker()));
+      config.append(matchDeckControls('online'));
       if(!ready)config.append(el('p','30枚のデッキを選ぶと対戦できます。'),btn('デッキを30枚に編集',()=>go('deck')));
       main.append(config);
       if(room.busy){
@@ -9890,7 +9922,7 @@ SOFTWARE.
       render();
       if(b?.opening)root.firstElementChild.dataset.room=room.session.code;
     }
-    if(page==='battle')restoreBattleDeck();
+    if(isMatchSetup(page)&&!online.state.session)restoreMatchDeck(page);
     const unsubscribe=engine.subscribe(sync);sync();
     function frame(now){
       if(Math.floor(now/250)!==clockStamp){
