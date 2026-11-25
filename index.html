@@ -16,12 +16,12 @@
     const mode = query.get('mode');
     if (query.has('room') || ['menu', 'online', 'cpu'].includes(mode)) {
       const target = new URL('/play/', location.origin);
-      if (query.has('room')) {
-        const code = (query.get('room') ?? '').toUpperCase().replace(/[^A-F0-9]/g, '').slice(0, 8);
+      const code = (query.get('room') ?? '').toUpperCase().replace(/[\s-]/g, '');
+      if (/^[A-F0-9]{8}$/.test(code)) {
         target.searchParams.set('mode', 'online');
-        if (code) target.searchParams.set('room', code);
+        target.searchParams.set('room', code);
       } else {
-        target.searchParams.set('mode', mode);
+        target.searchParams.set('mode', 'menu');
       }
       location.replace(target);
     }
@@ -36,10 +36,10 @@
         <span lang="en">BOUNDARY FRONT</span>
       </a>
       <nav aria-label="サイト内メニュー">
-        <a href="#modes">対戦モード</a>
+        <a href="#modes">遊べるモード</a>
         <a href="#factions">四つの陣営</a>
       </nav>
-      <a class="button button--outline header__play" href="/play/?mode=menu" aria-label="ゲームメニューへ">ゲームへ</a>
+      <a class="button button--outline header__play" href="/play/?mode=menu">ゲームメニューへ</a>
     </div>
   </header>
 
@@ -52,34 +52,28 @@
           <h1 id="title">境界戦線</h1>
           <a class="button button--gold frontier__entry" href="/play/?mode=menu">ゲームメニューへ</a>
           <p class="frontier__description">四つの世界が重なる戦場へ。陣営を選んで30枚のデッキを組み、上下二つのラインから相手のリーダーを攻めよう。</p>
-          <div class="frontier__actions">
-            <a class="button button--glass" href="/play/?mode=online">オンライン対戦</a>
-            <a class="button button--glass" href="/play/?mode=cpu">CPUと遊ぶ</a>
-          </div>
-          <p class="frontier__note">登録・インストール不要。初期デッキですぐに遊べます。</p>
+          <p class="frontier__note">はじめての方は、ゲームメニューのチュートリアルから基本操作を練習できます。</p>
         </div>
       </div>
     </section>
 
     <section class="section shell" id="modes" aria-labelledby="modes-title">
       <header class="section__header">
-        <h2 id="modes-title">対戦モード</h2>
+        <h2 id="modes-title">遊べるモード</h2>
+        <p>ゲームメニューから選べます。</p>
       </header>
       <div class="modes">
         <article class="mode mode--room">
           <h3>友だちと遊ぶ</h3>
           <p>ルームを作って招待リンクを共有。友だちが自分のデッキを選んで参加すると、試合が始まります。</p>
-          <a href="/play/?mode=online">ルーム対戦を開く</a>
         </article>
         <article class="mode mode--random">
           <h3>相手を探す</h3>
           <p>ランダムマッチで同じ時間に検索しているプレイヤーと対戦。待っている間は検索を取り消せます。</p>
-          <a href="/play/?mode=online">マッチング画面を開く</a>
         </article>
         <article class="mode mode--cpu">
           <h3>ひとりで遊ぶ</h3>
           <p>CPU戦で対戦相手と難易度を選べます。ゲームメニューには基本操作と各陣営のチュートリアルもあります。</p>
-          <a href="/play/?mode=cpu">CPU戦を開く</a>
         </article>
       </div>
     </section>
@@ -105,7 +99,7 @@
           </article>
           <article class="faction faction--stage">
             <img src="/assets/boundary/illustrations/LT1.png" width="128" height="128" alt="灯装隊長エンジ" loading="lazy" decoding="async">
-            <div class="faction__copy"><h3>星幕劇団</h3><p>味方の配置を変えて喝采を集め、ヒーローとヴィランの力を引き出す。</p></div>
+            <div class="faction__copy"><h3>星幕劇団</h3><p>ヒーローとヴィランを共演させて喝采を集め、二つの役を組み合わせて戦う。</p></div>
           </article>
         </div>
       </div>

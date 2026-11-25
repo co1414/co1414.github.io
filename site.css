@@ -31,8 +31,6 @@ a:focus-visible { outline: 2px solid #ffdaac; outline-offset: 4px; }
 .button--outline:hover { background: #d3a16d20; }
 .button--gold { background: #f3bd7d; color: #27180f; }
 .button--gold:hover { background: #ffd59d; }
-.button--glass { background: #111829c9; border-color: #e1c6a67a; }
-.button--glass:hover { background: #282c43; }
 
 .frontier { position: relative; isolation: isolate; min-height: clamp(500px, 46vw, 692px); display: grid; align-items: center; overflow: hidden; background: #161a31; border-bottom: 1px solid #e3b47869; }
 .frontier__art { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; object-fit: cover; object-position: 68% 53%; }
@@ -43,7 +41,6 @@ a:focus-visible { outline: 2px solid #ffdaac; outline-offset: 4px; }
 .frontier h1 { margin-block: 12px 14px; font: 820 clamp(3.3rem, 7.15vw, 6.6rem)/1.08 var(--header); letter-spacing: .05em; text-shadow: 0 3px 28px #100a10; }
 .frontier__entry { min-width: 210px; min-height: 55px; margin-block: 0 14px; font-size: 1.08rem; box-shadow: 0 6px 20px #0d0d1e80; }
 .frontier__description { max-width: 395px; color: #f0edf2; font-size: clamp(1rem, 1.65vw, 1.17rem); line-height: 1.8; text-shadow: 0 1px 6px #121426; }
-.frontier__actions { margin-top: 25px; display: flex; flex-wrap: wrap; gap: 10px; }
 .frontier__note { margin-top: 15px; color: #e4ddec; font-size: .9rem; }
 
 .section { padding-block: clamp(41px, 6vw, 80px); }
@@ -55,9 +52,7 @@ a:focus-visible { outline: 2px solid #ffdaac; outline-offset: 4px; }
 .mode--random { --accent: #afc9f4; }
 .mode--cpu { --accent: #e9acc8; }
 .mode h3 { color: var(--accent); font-size: 1.15rem; }
-.mode p { color: var(--muted); margin-block: 8px 16px; }
-.mode a { margin-top: auto; color: var(--paper); text-underline-offset: .25em; }
-.mode a:hover { color: var(--accent); }
+.mode p { color: var(--muted); margin-top: 8px; }
 
 .territories { background: #181c30; border-block: 1px solid var(--edge); }
 .factions { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
@@ -90,11 +85,9 @@ a:focus-visible { outline: 2px solid #ffdaac; outline-offset: 4px; }
   .frontier__content { padding-block: 53vw 29px; }
   .frontier h1 { margin-block: 8px 12px; }
   .frontier__entry { width: 100%; min-width: 0; }
-  .frontier__actions { margin-top: 20px; }
   .button { padding-inline: 15px; }
   .header__play { padding-inline: 11px; }
   .modes, .factions { grid-template-columns: 1fr; gap: 12px; }
   .mode { padding: 15px 18px 17px; }
-  .mode p { margin-bottom: 9px; }
 }
 
