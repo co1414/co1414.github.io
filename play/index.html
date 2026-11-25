@@ -6134,6 +6134,7 @@ SOFTWARE.
     return x && x.version===1 && nat(x.material)&&nat(x.serial)&&nat(x.placements)&&x.owned&&x.decks&&x.skins&&
       (x.battleWins===undefined||nat(x.battleWins)&&x.battleWins<=x.serial)&&
       (x.battleRewardMisses===undefined||nat(x.battleRewardMisses)&&x.battleRewardMisses<guaranteedRewardInterval&&x.battleRewardMisses<=x.serial)&&
+      (x.lastWeeklyClear===undefined||nat(x.lastWeeklyClear))&&
       Object.keys(p.cards).every(id=>(expansionId(id)&&!Object.hasOwn(x.owned,id))||(nat(x.owned[id])&&x.owned[id]<=3))&&
       factions.every(f=>validDeck(p,f,x.decks[f],deckShelf(x,f).slots?.[deckShelf(x,f).active]?.draft?undefined:x.owned,false)&&p.factions[f].skins.some(s=>s.id===x.skins[f]))&&
       validDeckLibrary(p,x)&&
@@ -6198,14 +6199,17 @@ SOFTWARE.
   const expertRates={N:44,R:30,SR:18,UR:8};
   const bossRates={N:45,R:25,SR:20,UR:10};
   const battleRewardSize=5, guaranteedRewardInterval=10;
+  const weeklyClearReward=36;
   const weeklyRules={
     'rear-guard':{name:'後衛護衛戦',text:'それぞれ最初に後列へ登場したユニットにバリア。'},
-    'heavy-play':{name:'大型戦力演習',text:'元のコスト5以上のカードを通常・強化で使って勝つと、1枚につき素材12。最大36。'}
+    'heavy-play':{name:'大型戦力演習'}
   };
-  function weeklyRule(time=Date.now()){
-    const week=Math.floor((time-4*86400000+9*3600000)/(7*86400000));
-    return Object.keys(weeklyRules)[((week%2)+2)%2];
+  const weeklyRuleId=week=>Object.keys(weeklyRules)[((week%2)+2)%2];
+  function weeklyChallenge(time=Date.now()){
+    const weeklyWeek=Math.floor((time-4*86400000+9*3600000)/(7*86400000));
+    return {weekly:weeklyRuleId(weeklyWeek),weeklyWeek};
   }
+  const weeklyRule=time=>weeklyChallenge(time).weekly;
   function rewardRates(p,{mode,difficulty},boss=false){
     if(boss)return bossRates;
     if(mode==='battle'&&difficulty===2&&p.battleDifficultyRevision===1)return expertRates;
@@ -6282,7 +6286,8 @@ SOFTWARE.
       }
     }else{
       if(b.result.reason!=='降参') x.placements+=b.placements[0];
-      if(win){
+      // Older save histories have no week number and retain their original drops.
+      if(win&&config.weeklyWeek===undefined){
         const expandedReward=config.mode==='battle'&&Boolean(rules.battleRewardRevision);
         const useStreak=expandedReward&&rules.battleRewardRevision>=2;
         const nextMisses=(x.battleRewardMisses??0)+1;
@@ -6312,6 +6317,8 @@ SOFTWARE.
           const highRarity=r.drops.some(({id})=>['SR','UR'].includes(rules.cards[id].rarity));
           x.battleRewardMisses=highRarity?0:nextMisses;
         }
+      }
+      if(win){
         if(story&&config.encounter!==undefined){
           const cleared=x.storyCleared??=[];
           const encounter=storyId(stage,config.encounter);
@@ -6319,7 +6326,12 @@ SOFTWARE.
           if(config.encounter===1&&!x.cleared.includes(stage))x.cleared.push(stage);
         }else if(story&&!x.cleared.includes(stage)){x.cleared.push(stage);award('ストーリー初回撃破',boss?100:40);}
         if(!x.won.includes(config.faction))x.won.push(config.faction);
-        if(config.weekly==='heavy-play'&&b.missionStats?.heavy)award('大型戦力演習',12*Math.min(3,b.missionStats.heavy));
+        if(config.weeklyWeek!==undefined){
+          if(config.weeklyWeek>(x.lastWeeklyClear??-1)){
+            x.lastWeeklyClear=config.weeklyWeek;
+            award('週替わり戦 初回クリア',weeklyClearReward);
+          }
+        }else if(config.weekly==='heavy-play'&&b.missionStats?.heavy)award('大型戦力演習',12*Math.min(3,b.missionStats.heavy));
       }
       if(!rules.missionRevision)finishFirstMissions(x,b,award);
       else if(b.result.reason!=='降参')finishMissions(x,b,r,award);
@@ -6334,6 +6346,7 @@ SOFTWARE.
     const practice=c.mode==='battle'&&c.practice===true&&rules.applauseRevision===1;
     if(c.practice&&!practice)return false;
     if(c.weekly!==undefined&&(c.mode!=='battle'||practice||!rules.applauseRevision||!Object.hasOwn(weeklyRules,c.weekly)))return false;
+    if(c.weeklyWeek!==undefined&&(!Number.isSafeInteger(c.weeklyWeek)||c.weeklyWeek<0||c.weekly!==weeklyRuleId(c.weeklyWeek)))return false;
     if(c.course!==undefined){
       const factionCourse=c.mode==='tutorial'&&(c.course==='advanced'&&rules.tacticalRevision||
         c.course==='practice'&&rules.cardRoleRevision);
@@ -6352,6 +6365,7 @@ SOFTWARE.
     if(applauseCast)b.config.applauseCast=true;
     if(practice)b.config.practice=true;
     if(c.weekly)b.config.weekly=c.weekly;
+    if(c.weeklyWeek!==undefined)b.config.weeklyWeek=c.weeklyWeek;
     if(c.mode==='battle'&&!practice&&rules.applauseRevision)x.lastBattleDeck={faction:f,index:deckShelf(x,f).active};
     if(c.mode==='battle'){
       const {hp,cost}=cpuProfile(rules,b.config);
@@ -6765,7 +6779,7 @@ SOFTWARE.
   K.registerGenre('boundary',{validate,init(st,p){st.screen='home';st.battle=null;st.profile=newProfile(p);},act,migrateSave,
     mergeCommands(a,c){if(a?.type==='advance'&&c.type==='advance'&&a.ticks+c.ticks<=72000){a.ticks+=c.ticks;return true;}return false;}});
   Object.assign(B,{getDeck,deckName,deckConfig,deckVariants,setForVariant,hasExpansion,expansionId,validDeck,profileOK,battleProject,missionStatus,matchFingerprint,cpuProfile,rewardRates,
-    battleRewardSize,guaranteedRewardInterval,weeklyRules,weeklyRule,deckShortages,deckCode,readDeckCode,
+    battleRewardSize,guaranteedRewardInterval,weeklyRules,weeklyRule,weeklyChallenge,weeklyClearReward,deckShortages,deckCode,readDeckCode,
     deckShelf,matchDeckPreference,deckSlotLimit,deckNameLimit,sampleDecks,sampleDeckIndex,storyId,storyEncounter,storyAvailable,redrawHand,choose,cpuAction,stepBattle,prices,factions});
 })(globalThis.Kotonoha);
 
@@ -8900,13 +8914,13 @@ SOFTWARE.
           el('p',challenge?.tactics??tactics[enemy]),
           el('small','代表カード　'+(challenge?.signature??[...new Set(recipe)].slice(0,3)).map(id=>p.cards[id].name).join('・')));
         const rewardSet=setNames[B.setForVariant(variant)];
-        if(rewardSet)info.append(el('p','勝利報酬のうち1枠は'+rewardSet+'のカード。'));
+        if(rewardSet)info.append(el('p','通常バトルの勝利報酬のうち1枠は'+rewardSet+'のカード。'));
         const config={mode:'battle',difficulty:level};
         const {hp,cost,interval}=B.cpuProfile(p,config);
         const {N,R,SR,UR}=B.rewardRates(p,config);
         info.append(el('small','CPU開始時 HP '+hp+' ／ コスト '+cost+' ／ 判断間隔 '+interval/20+'秒'));
         if(p.battleRewardRevision){
-          info.append(el('p','勝利報酬 '+B.battleRewardSize+'枚。SRかURが出ない勝利が続くと、'+B.guaranteedRewardInterval+'勝目の'+B.battleRewardSize+'枚目で確定します。SRかURが出るとカウントは0に戻ります。'),
+          info.append(el('p','通常バトルの勝利報酬 '+B.battleRewardSize+'枚。SRかURが出ない勝利が続くと、'+B.guaranteedRewardInterval+'勝目の'+B.battleRewardSize+'枚目で確定します。SRかURが出るとカウントは0に戻ります。'),
             el('strong',nextGuaranteedReward(),'bf-notice'));
         }
         info.append(el('p','通常枠 1枚あたり　N '+N+'% ／ R '+R+'% ／ SR '+SR+'% ／ UR '+UR+'%'));
@@ -8923,8 +8937,11 @@ SOFTWARE.
       }else{
         main.append(btn(ready?'対戦開始':'デッキを編集',startBattle,'primary'));
         if(!story&&p.applauseRevision){
-          const id=B.weeklyRule(), weekly=B.weeklyRules[id], panel=onlinePanel('週替わり　'+weekly.name,weekly.text);
-          panel.append(btn('週替わり戦を始める',()=>playStart('battle',faction,undefined,{weekly:id}),'',!ready));
+          const {weekly:id,weeklyWeek}=B.weeklyChallenge();
+          const weekly=B.weeklyRules[id], panel=onlinePanel('週替わり　'+weekly.name,weekly.text);
+          const claimed=weeklyWeek<=(profile().lastWeeklyClear??-1);
+          panel.append(el('p',claimed?'今週の初回報酬は獲得済みです。':'今週の初回クリアで素材 ＋'+B.weeklyClearReward,'bf-notice'),
+            btn('週替わり戦を始める',()=>playStart('battle',faction,undefined,B.weeklyChallenge()),'',!ready));
           main.append(panel);
         }
       }
@@ -9752,7 +9769,7 @@ SOFTWARE.
         btn(nextOperation?'次の戦闘へ':'再戦',()=>{
           returnToSetup();
           if(nextOperation){if(conf.encounter===0)encounter=1;else selectChapter(conf.stage+1);render();}
-          else playStart(story?'story':'battle',faction,undefined,conf.weekly?{weekly:conf.weekly}:{});
+          else playStart(story?'story':'battle',faction,undefined,conf.weekly?B.weeklyChallenge():{});
         },'primary')));
     }
     function syncAudio(s){
